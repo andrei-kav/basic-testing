@@ -3,7 +3,10 @@ import { throwError, throwCustomError, resolveValue, MyAwesomeError, rejectCusto
 
 describe('resolveValue', () => {
   test('should resolve provided value', async () => {
-    expect(resolveValue('value')).resolves.toBe('value')
+    const result = await resolveValue('value');
+    expect(result).toBe('value')
+    // also can look as following
+    // expect(resolveValue('value')).resolves.toBe('value')
   });
 });
 
@@ -25,6 +28,6 @@ describe('throwCustomError', () => {
 
 describe('rejectCustomError', () => {
   test('should reject custom error', async () => {
-    expect(rejectCustomError()).rejects.toThrow(new MyAwesomeError())
+    await expect(rejectCustomError()).rejects.toThrow(new MyAwesomeError())
   });
 });
