@@ -1,5 +1,13 @@
 // Uncomment the code below and write your tests
 import {BankAccount, getBankAccount, InsufficientFundsError, SynchronizationFailedError, TransferFailedError} from '.';
+import * as lodash from 'lodash'
+
+jest.mock('lodash', () => {
+  return {
+    __esModule: true,    //    <----- this __esModule: true is important
+    ...jest.requireActual('lodash')
+  };
+});
 
 describe('BankAccount', () => {
   let account: BankAccount;
@@ -45,33 +53,22 @@ describe('BankAccount', () => {
   });
 
   test('fetchBalance should return number in case if request did not failed', async () => {
-    const balance = await account.fetchBalance();
-    if (balance !== null) {
-      expect(typeof balance === 'number').toBeTruthy()
-    } else {
-      expect(balance).toBeNull()
-    }
+    (jest.spyOn as any)(lodash, 'random').mockImplementation(() => 67)
+    const balance = await account.fetchBalance()
+    expect(typeof balance === 'number').toBeTruthy()
   });
 
   test('should set new balance if fetchBalance returned number', async () => {
+    const newBalance = 67;
+    (jest.spyOn as any)(lodash, 'random').mockImplementation(() => newBalance)
     const previousBalance = account.getBalance()
-    try {
-      await account.synchronizeBalance()
-      expect(typeof account.getBalance() === "number").toBeTruthy()
-      expect(account.getBalance()).not.toBe(previousBalance)
-    }
-    catch (err) {
-      expect(account.getBalance()).toBe(previousBalance)
-    }
+    await account.synchronizeBalance()
+    expect(account.getBalance()).toBe(newBalance)
+    expect(previousBalance).not.toBe(newBalance)
   });
 
   test('should throw SynchronizationFailedError if fetchBalance returned null', async () => {
-    try {
-      await account.synchronizeBalance()
-      expect(typeof account.getBalance() === 'number').toBeTruthy()
-    }
-    catch (err) {
-      expect(err).toEqual(new SynchronizationFailedError())
-    }
+    (jest.spyOn as any)(lodash, 'random').mockImplementation(() => 0);
+    await expect(account.synchronizeBalance()).rejects.toThrow(new SynchronizationFailedError())
   });
 });
