@@ -1,17 +1,37 @@
 // Uncomment the code below and write your tests
-/* import axios from 'axios';
-import { throttledGetDataFromApi } from './index'; */
+import { throttledGetDataFromApi } from './index';
+import axios from "axios";
+
+jest.mock('axios', () => {
+  const mockInstance = { get: () => Promise.resolve({data: {name: 'Andrei'}}) }
+  return {
+    create: () => mockInstance,
+  };
+});
+
+jest.mock('lodash', () => ({
+  throttle: (fn: () => unknown) => fn,
+}));
 
 describe('throttledGetDataFromApi', () => {
+
   test('should create instance with provided base url', async () => {
-    // Write your test here
+    const createInstanceSpy = (jest.spyOn as any)(axios, 'create');
+    const baseURL = 'https://jsonplaceholder.typicode.com'
+    await throttledGetDataFromApi('')
+    expect(createInstanceSpy).toHaveBeenCalledWith({baseURL})
   });
 
   test('should perform request to correct provided url', async () => {
-    // Write your test here
+    const getSpy = (jest.spyOn as any)(axios.create(), 'get')
+    await throttledGetDataFromApi('request')
+    expect(getSpy).toHaveBeenCalled()
+    expect(getSpy).toHaveBeenCalledWith('request')
   });
 
   test('should return response data', async () => {
-    // Write your test here
+    const res = await throttledGetDataFromApi('request')
+    expect(res).toEqual({name: 'Andrei'})
   });
+
 });
